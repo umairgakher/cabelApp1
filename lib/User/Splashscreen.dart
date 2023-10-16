@@ -2,6 +2,7 @@
 
 import 'dart:async';
 import 'package:app/Admin/adminDashboard.dart';
+import 'package:app/Emplyee/Dashboard.dart';
 import 'package:app/User/Dashboard/Dashboard.dart';
 import 'package:app/loder.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -51,7 +52,7 @@ class _SplashscreenState extends State<Splashscreen> {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                builder: (context) => Admin_Dashboard(),
+                builder: (context) => EmployeeDashboard(),
               ),
             );
           } else if (checkuser == 0) {

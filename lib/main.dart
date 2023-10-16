@@ -4,14 +4,9 @@ import 'package:flutter/material.dart';
 // import 'package:flutter_cable_app/Admin/Bills/Bills.dart';
 // import 'Admin/AdminDashboard.dart';
 
-void main() async {
-  // Ensure that Flutter is initialized.
-
-  WidgetsFlutterBinding.ensureInitialized();
-
-  // Initialize Firebase.
-  await Firebase.initializeApp();
-  // Continue with the rest of your application setup.
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized(); // Ensure Flutter is initialized.
+  await Firebase.initializeApp(); // Initialize Firebase services.
   runApp(const MyApp());
 }
 

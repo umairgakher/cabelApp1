@@ -1,72 +1,52 @@
-// ignore_for_file: file_names, library_private_types_in_public_api, camel_case_types, prefer_const_constructors, use_key_in_widget_constructors, non_constant_identifier_names, avoid_print, unrelated_type_equality_checks, unused_local_variable, unnecessary_brace_in_string_interps
+// ignore_for_file: unnecessary_brace_in_string_interps, file_names, use_key_in_widget_constructors, library_private_types_in_public_api, avoid_print, prefer_const_constructors
 
 import 'package:app/Admin/Bills/Bills.dart';
-import 'package:app/Admin/emplyees.dart';
-import 'package:app/Admin/holidaysreques.dart';
-import 'package:app/Admin/polls/polls.dart';
+import 'package:app/Admin/Help/admin_help.dart';
+import 'package:app/Emplyee/holiday.dart';
+import 'package:app/Emplyee/myholidays.dart';
 import 'package:app/signin.dart';
+import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
-import 'Help/admin_help.dart';
-
-class Admin_Dashboard extends StatefulWidget {
-  const Admin_Dashboard({super.key});
-
+class EmployeeDashboard extends StatefulWidget {
   @override
-  _AdminDashboardState createState() => _AdminDashboardState();
+  _EmployeeDashboardState createState() => _EmployeeDashboardState();
 }
 
-class _AdminDashboardState extends State<Admin_Dashboard> {
+class _EmployeeDashboardState extends State<EmployeeDashboard> {
   User? user;
-  String? userId;
   String? username;
   String? email;
-  Timestamp? request_time;
-
-  String? date;
-  String formatRequestTime(Timestamp? timestamp) {
-    if (timestamp != null) {
-      DateTime dateTime = timestamp.toDate();
-      date = DateFormat('yyyy-MM-dd ').format(dateTime);
-      return DateFormat('HH:mm:ss').format(dateTime);
-    } else {
-      return '';
-    }
-  }
-
-  final auth = FirebaseAuth.instance;
 
   @override
   void initState() {
-    print("initState called");
     super.initState();
     user = FirebaseAuth.instance.currentUser;
-    userId = user?.uid;
 
-    // Retrieve the profile image URL from Firestore and set it to `url`
+    // Retrieve user data from Firestore and set it to `username` and `email`
     FirebaseFirestore.instance
         .collection('users')
-        .doc(userId)
+        .doc(user?.uid)
         .get()
         .then((snapshot) {
-      var data = snapshot.data();
-      print("Fetched data: $data");
-      if (data != null) {
-        print("User data retrieved: $data"); // Check if data is being retrieved
+      if (snapshot.exists) {
+        var data = snapshot.data() as Map<String, dynamic>;
         setState(() {
           email = data['email'];
           username = data['username'];
         });
-      } else {
-        print(
-            "User data not found!"); // Check if data retrieval is unsuccessful
       }
     }).catchError((error) {
       print("Error fetching user data: $error");
     });
+
+    // Fetch employee data from Firestore's "salary" collection
+    _fetchEmployeeData();
+  }
+
+  Future<void> _fetchEmployeeData() async {
+    setState(() {});
   }
 
   @override
@@ -76,7 +56,7 @@ class _AdminDashboardState extends State<Admin_Dashboard> {
         iconTheme: IconThemeData(color: Colors.white),
         backgroundColor: Color(0xff453658),
         title: Text(
-          'Admin Complaints',
+          'Salary Details',
           style: TextStyle(color: Colors.white),
         ),
       ),
@@ -114,7 +94,8 @@ class _AdminDashboardState extends State<Admin_Dashboard> {
                 {
                   Navigator.pop(
                     context,
-                    MaterialPageRoute(builder: (context) => Admin_Dashboard()),
+                    MaterialPageRoute(
+                        builder: (context) => EmployeeDashboard()),
                   );
                 }
                 // Handle Home option tap
@@ -123,11 +104,11 @@ class _AdminDashboardState extends State<Admin_Dashboard> {
             Divider(color: Colors.grey),
             ListTile(
                 leading: Icon(
-                  Icons.verified_user,
+                  Icons.request_page,
                   color: Colors.black,
                 ),
                 title: Text(
-                  'Bills',
+                  'Holiday Requests',
                   style: TextStyle(
                     color: Colors.black,
                   ),
@@ -135,17 +116,18 @@ class _AdminDashboardState extends State<Admin_Dashboard> {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const bills_user()),
+                    MaterialPageRoute(
+                        builder: (context) => HolidayRequestScreen()),
                   );
                 }),
             Divider(color: Colors.grey),
             ListTile(
                 leading: Icon(
-                  Icons.person_2,
+                  Icons.holiday_village,
                   color: Colors.black,
                 ),
                 title: Text(
-                  'Employee',
+                  'MY Holiday',
                   style: TextStyle(
                     color: Colors.black,
                   ),
@@ -153,35 +135,17 @@ class _AdminDashboardState extends State<Admin_Dashboard> {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const employee()),
-                  );
-                }),
-            Divider(color: Colors.grey),
-            ListTile(
-                leading: Icon(
-                  Icons.poll,
-                  color: Colors.black,
-                ),
-                title: Text(
-                  'Polls',
-                  style: TextStyle(
-                    color: Colors.black,
-                  ),
-                ),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => Polls_admin()),
+                    MaterialPageRoute(builder: (context) => MYholidays()),
                   );
                 }),
             Divider(color: Colors.grey),
             ListTile(
               leading: Icon(
-                Icons.request_page,
+                Icons.verified_user,
                 color: Colors.black,
               ),
               title: Text(
-                'Holidays Requests',
+                'profile',
                 style: TextStyle(
                   color: Colors.black,
                 ),
@@ -189,9 +153,8 @@ class _AdminDashboardState extends State<Admin_Dashboard> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => holidaysRequests()),
+                  MaterialPageRoute(builder: (context) => const bills_user()),
                 );
-
                 // Handle Settings option tap
               },
               //
@@ -250,8 +213,8 @@ class _AdminDashboardState extends State<Admin_Dashboard> {
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
-            .collection('complains')
-            .where('status', isNotEqualTo: 2)
+            .collection('salary')
+            .where('empId', isEqualTo: user!.uid)
             .snapshots(),
         builder: (BuildContext context,
             AsyncSnapshot<QuerySnapshot<Object?>> snapshot) {
@@ -267,7 +230,7 @@ class _AdminDashboardState extends State<Admin_Dashboard> {
           if (documents.isEmpty) {
             return Center(
               child: Text(
-                'No complains yet.',
+                'No salary detail yet.',
                 style: TextStyle(fontSize: 16),
               ),
             );
@@ -276,12 +239,12 @@ class _AdminDashboardState extends State<Admin_Dashboard> {
               shrinkWrap: true,
               itemCount: documents.length,
               itemBuilder: (BuildContext context, int index) {
-                QueryDocumentSnapshot document = documents[index];
                 Map<String, dynamic>? data =
                     documents[index].data() as Map<String, dynamic>?;
-                var address = data?['address'];
-                var phoneno = data?["phoneno"];
-                var description = data?["complain"];
+                var month = data?['month'];
+                var salary = data?["salary"];
+                var paid = data?["paid"];
+                var year = data?["year"];
                 // var status = data?["status"];
                 return Container(
                   decoration: BoxDecoration(
@@ -302,74 +265,24 @@ class _AdminDashboardState extends State<Admin_Dashboard> {
                       ),
                       SizedBox(height: 8),
                       Text(
-                        'Address: $address',
+                        'Month: $month $year',
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                       SizedBox(height: 8),
                       Divider(color: Colors.grey),
                       SizedBox(height: 8),
-                      Text('Phone Number: ${phoneno}'),
+                      Text('Total: ${salary}'),
                       SizedBox(height: 8),
                       Divider(color: Colors.grey),
                       SizedBox(height: 8),
-                      Text('Description: $description'),
+                      Text('Pyment status: $paid'),
                       SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Icon(Icons.attach_file),
-                          ElevatedButton(
-                            onPressed: () async {
-                              await FirebaseFirestore.instance
-                                  .collection("complains")
-                                  .doc(document.id)
-                                  .update({"status": 1});
-                              setState(() {});
-                            },
-                            child: Text('In Progress'),
-                          ),
-                          SizedBox(width: 8),
-                          ElevatedButton(
-                            onPressed: () async {
-                              await FirebaseFirestore.instance
-                                  .collection("complains")
-                                  .doc(document.id)
-                                  .update({"status": 2});
-                            },
-                            child: Text('Resolved'),
-                          ),
-                        ],
-                      ),
                     ],
                   ),
                 );
               });
         },
       ),
-      // body: complaints.isEmpty
-      //     ? Center(
-      //         child: Text(
-      //           'No complaints yet',
-      //           style: TextStyle(fontSize: 18),
-      //         ),
-      //       )
-      //     : ListView.builder(
-      //         itemCount: complaints.length,
-      //         itemBuilder: (context, index) {
-      //           return ComplaintCard(
-      //             complaint: complaints[index],
-      //             onResolved: () {
-      //               setState(() {
-      //                 complaints.removeAt(index);
-      //               });
-      //             },
-      //             onInProgress: () {
-      //               setState(() {
-      //                 complaints[index].inProgress = true;
-      //               });
-      //             },
-      //           );
-      //         },
-      //       ),
     );
   }
 }

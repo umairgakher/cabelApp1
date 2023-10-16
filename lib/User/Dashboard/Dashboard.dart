@@ -1,4 +1,4 @@
-// ignore_for_file: unnecessary_new, file_names, use_key_in_widget_constructors, prefer_const_constructors_in_immutables, library_private_types_in_public_api, deprecated_member_use, prefer_const_constructors
+// ignore_for_file: unnecessary_new, file_names, use_key_in_widget_constructors, prefer_const_constructors_in_immutables, library_private_types_in_public_api, deprecated_member_use, prefer_const_constructors, avoid_print, unused_element, no_leading_underscores_for_local_identifiers
 
 import 'package:app/User/Complaint/complaintus.dart';
 import 'package:app/User/SelfService/Selfservice.dart';
@@ -6,28 +6,13 @@ import 'package:app/User/Setting/Setting.dart';
 import 'package:app/User/Talkus/Talkus.dart';
 import 'package:app/User/TrackOrder/TrackC.dart';
 import 'package:app/signin.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../profile.dart';
 import '../Services/Services.dart';
-
-// void main() {
-//   runApp(MyApp());
-// }
-
-// class MyApp extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       title: 'Dashboard Example',
-//       theme: ThemeData(
-//         primarySwatch: Colors.blue,
-//       ),
-//       home: Dashboard(),
-//     );
-//   }
-// }
 
 class Dashboard extends StatefulWidget {
   Dashboard({Key? key});
@@ -58,6 +43,40 @@ class _DashboardState extends State<Dashboard> {
     title: "Bills",
     img: "images/setting.jpg",
   );
+  User? user;
+  String? username;
+  String? email;
+
+  @override
+  void initState() {
+    super.initState();
+    user = FirebaseAuth.instance.currentUser;
+
+    // Retrieve user data from Firestore and set it to `username` and `email`
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(user?.uid)
+        .get()
+        .then((snapshot) {
+      if (snapshot.exists) {
+        var data = snapshot.data() as Map<String, dynamic>;
+        setState(() {
+          email = data['email'];
+          username = data['username'];
+        });
+      }
+    }).catchError((error) {
+      print("Error fetching user data: $error");
+    });
+
+    // Fetch employee data from Firestore's "salary" collection
+    // _fetchEmployeeData();
+  }
+
+  Future<void> _fetchEmployeeData() async {
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     List<Items> myList = [
@@ -80,31 +99,20 @@ class _DashboardState extends State<Dashboard> {
           child: ListView(
             padding: EdgeInsets.zero,
             children: <Widget>[
-              const DrawerHeader(
+              DrawerHeader(
                 decoration: BoxDecoration(
                   color: Color(0xff392850),
                 ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CircleAvatar(
-                      radius: 30,
-                      child: Icon(
-                        Icons.person,
-                        size: 50,
-                        color: Colors.green, // Set the desired color here
-                      ),
-                    ),
-                    SizedBox(height: 10),
-                    Text(
-                      'Amjid Ali',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
+                child: UserAccountsDrawerHeader(
+                  decoration: BoxDecoration(color: Color(0xff392850)),
+                  accountName: Text(
+                    username ??
+                        "Unknown", // Provide a default value if username is null
+                    style: TextStyle(fontSize: 18),
+                  ),
+                  accountEmail: Text(email ??
+                      ""), // Use the null-aware operator to handle null values
+                  currentAccountPictureSize: Size.square(100),
                 ),
               ),
               ListTile(
@@ -117,22 +125,14 @@ class _DashboardState extends State<Dashboard> {
               ),
               const Divider(),
               ListTile(
-                leading: const Icon(Icons.account_circle),
-                title: const Text('Profile'),
-                onTap: () {
-                  // Do something for Profile
-                  Navigator.pop(context); // Close the drawer
-                },
-              ),
-              const Divider(),
-              ListTile(
-                leading: const Icon(Icons.settings),
-                title: const Text('Settings'),
-                onTap: () {
-                  // Do something for Settings
-                  Navigator.pop(context); // Close the drawer
-                },
-              ),
+                  leading: const Icon(Icons.account_circle),
+                  title: const Text('Profile'),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ProfileScreen()),
+                    );
+                  }),
               const Divider(),
               ListTile(
                 leading: const Icon(Icons.help),
@@ -277,63 +277,67 @@ class _PollWidgetState extends State<PollWidget> {
   int selectedOption = 0; // Initialize selectedOption variable
   bool isButtonDisabled =
       false; // Add a boolean variable to track button disable state
-
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 200,
-      width: 410,
-      decoration: BoxDecoration(
-        color: const Color(0xff453658),
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'Which One is Better?',
-              style: GoogleFonts.openSans(
-                textStyle: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Container(
+        height: 200,
+        width: MediaQuery.of(context).size.width *
+            0.9, // Adjusted width to make it responsive
+        decoration: BoxDecoration(
+          color: const Color(0xff453658),
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Which One is Better?',
+                style: GoogleFonts.openSans(
+                  textStyle: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14, // Reduced text size
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 6),
-            buildRadioButton(
-              1,
-              'The Newer Connection with the 400 channels?',
-            ),
-            buildRadioButton(2, 'The older Connection with the 200 channels?'),
-            buildRadioButton(3, 'The Connection with the 100 HD channels?'),
-            const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: isButtonDisabled
-                  ? null
-                  : () {
-                      setState(() {
-                        selectedOption =
-                            selectedOption; // Optional: Update the selectedOption again
-                        isButtonDisabled = true; // Disable the button
-                      });
-                    },
-              style: ElevatedButton.styleFrom(
-                primary: Colors.blue,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
+              const SizedBox(height: 6),
+              buildRadioButton(
+                1,
+                'The Newer Connection with the 400 channels?',
+              ),
+              buildRadioButton(
+                  2, 'The older Connection with the 200 channels?'),
+              buildRadioButton(3, 'The Connection with the 100 HD channels?'),
+              const SizedBox(height: 10),
+              ElevatedButton(
+                onPressed: isButtonDisabled
+                    ? null
+                    : () {
+                        setState(() {
+                          selectedOption =
+                              selectedOption; // Optional: Update the selectedOption again
+                          isButtonDisabled = true; // Disable the button
+                        });
+                      },
+                style: ElevatedButton.styleFrom(
+                  primary: Colors.blue,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  elevation:
+                      2, // Adjust the elevation value for a subtle shadow effect
+                  minimumSize: Size(150, 40),
                 ),
-                elevation:
-                    2, // Adjust the elevation value for a subtle shadow effect
-                minimumSize: Size(150, 40),
+                child: Text(
+                  isButtonDisabled ? 'Voted' : 'Vote',
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
-              child: Text(
-                isButtonDisabled ? 'Voted' : 'Vote',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -351,8 +355,8 @@ class _PollWidgetState extends State<PollWidget> {
         child: Row(
           children: [
             Container(
-              height: 20,
-              width: 20,
+              height: 18, // Reduced icon size
+              width: 18, // Reduced icon size
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(color: Colors.grey),
@@ -363,18 +367,20 @@ class _PollWidgetState extends State<PollWidget> {
                   ? const Icon(
                       Icons.check,
                       color: Colors.white,
-                      size: 16,
+                      size: 14, // Reduced icon size
                     )
                   : null,
             ),
-            const SizedBox(width: 10),
-            Text(
-              label,
-              style: GoogleFonts.openSans(
-                textStyle: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w300,
+            const SizedBox(width: 8), // Reduced spacing
+            Expanded(
+              child: Text(
+                label,
+                style: GoogleFonts.openSans(
+                  textStyle: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14, // Reduced text size
+                    fontWeight: FontWeight.w300,
+                  ),
                 ),
               ),
             ),

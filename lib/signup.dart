@@ -111,7 +111,7 @@ class _RegScreenState extends State<RegScreen> {
                 "createdId": DateTime.now(),
                 "uPhone": uphone,
                 "profileImage": " ",
-                'bill': 0,
+                'salary': 0,
                 "userId": user.uid,
                 "checkuser": 2,
                 "paid": 0,
@@ -313,7 +313,7 @@ class _RegScreenState extends State<RegScreen> {
         ),
         Center(
           child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            const Text("Sign up as a driver?"),
+            const Text("Sign up as a Emplyee?"),
             TextButton(
               onPressed: () => _createAccount(1),
               child: const Text(

@@ -4,6 +4,7 @@
 // import 'package:app/user/signup.dart';
 // import 'package:app/user/userdashboard.dart';
 import 'package:app/Admin/AdminDashboard.dart';
+// import 'package:app/Employee/Dashboard.dart';
 import 'package:app/User/Dashboard/Dashboard.dart';
 import 'package:app/signup.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -230,8 +231,12 @@ class _loginScreenState extends State<loginScreen> {
                             MaterialPageRoute(
                                 builder: (context) => Dashboard()),
                           );
-                        } else {
-                          print('Invalid checkuser value');
+                        } else if (checkuser == 2) {
+                          // Navigator.push(
+                          //   context,
+                          //   MaterialPageRoute(
+                          //       builder: (context) => EmployeeDashboard()),
+                          // );
                         }
                       } else {
                         print('User document does not exist');
