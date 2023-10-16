@@ -140,10 +140,7 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
                 }),
             Divider(color: Colors.grey),
             ListTile(
-              leading: Icon(
-                Icons.verified_user,
-                color: Colors.black,
-              ),
+              leading: const Icon(Icons.account_circle),
               title: Text(
                 'profile',
                 style: TextStyle(

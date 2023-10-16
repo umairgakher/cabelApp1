@@ -246,7 +246,11 @@ class _DashboardState extends State<Dashboard> {
     } else if (title == "Talk to Us") {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const Talk_service()),
+        MaterialPageRoute(
+            builder: (context) => ChatScreen(
+                  currentUserId: user!.uid,
+                  adminId: 'muVRzBO10cUDTrASEpkUW25xosk2',
+                )),
       );
     } else if (title == "Change Service") {
       Navigator.push(

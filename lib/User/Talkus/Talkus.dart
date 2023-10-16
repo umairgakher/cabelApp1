@@ -1,110 +1,140 @@
-// ignore_for_file: file_names, library_private_types_in_public_api, camel_case_types, prefer_const_constructors
+// ignore_for_file: file_names, use_key_in_widget_constructors, prefer_const_constructors_in_immutables, library_private_types_in_public_api, prefer_const_constructors
 
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-class Talk_service extends StatefulWidget {
-  const Talk_service({Key? key}) : super(key: key);
+class ChatScreen extends StatefulWidget {
+  final String currentUserId;
+  final String adminId;
+
+  ChatScreen({required this.currentUserId, required this.adminId});
 
   @override
-  _TalkServiceState createState() => _TalkServiceState();
+  _ChatScreenState createState() => _ChatScreenState();
 }
 
-class _TalkServiceState extends State<Talk_service> {
-  List<String> messages = [];
-  TextEditingController messageController = TextEditingController();
-
-  void sendMessage(String message) {
-    setState(() {
-      messages.add('User: $message');
-    });
-
-    String adminReply = 'Hy Hope you are Doing well \n How can we assist you?';
-    receiveMessage(adminReply);
-  }
-
-  void receiveMessage(String message) {
-    setState(() {
-      messages.add('Admin: $message');
-    });
-  }
+class _ChatScreenState extends State<ChatScreen> {
+  final TextEditingController _messageController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Talk Us',
+          "Admin Chat",
           style: TextStyle(color: Colors.white),
         ),
         iconTheme: IconThemeData(color: Colors.white),
-        backgroundColor: Color(0xff392850),
+        backgroundColor: Color(0xff453658),
       ),
       body: Column(
-        children: [
+        children: <Widget>[
           Expanded(
-            child: Container(
-              padding: EdgeInsets.all(8.0),
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-              child: ListView.builder(
-                reverse: true, // Display messages in reverse order
-                itemCount: messages.length,
-                itemBuilder: (context, index) {
-                  String message = messages[index];
-                  bool isAdminReply = message.startsWith('Admin:');
-                  return Container(
-                    margin: EdgeInsets.symmetric(vertical: 4.0),
-                    padding: EdgeInsets.all(8.0),
-                    decoration: BoxDecoration(
-                      color: isAdminReply ? Colors.blue : Colors.white,
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    child: Text(
-                      message,
-                      style: TextStyle(
-                        fontSize: 16.0,
-                        color: isAdminReply ? Colors.white : Colors.black,
-                      ),
-                    ),
+            child: StreamBuilder(
+              stream: FirebaseFirestore.instance
+                  .collection('chats')
+                  .doc(widget.currentUserId)
+                  .collection(widget.adminId)
+                  .orderBy('timestamp')
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return CircularProgressIndicator();
+                }
+                final messages = snapshot.data!.docs;
+                List<Widget> messageWidgets = [];
+                for (var message in messages) {
+                  final messageText = message['text'];
+                  final messageSender = message['sender'];
+
+                  final messageWidget = MessageWidget(
+                    text: messageText,
+                    isCurrentUser: messageSender == widget.currentUserId,
                   );
-                },
-              ),
+
+                  messageWidgets.add(messageWidget);
+                }
+
+                return ListView(
+                  children: messageWidgets,
+                );
+              },
             ),
           ),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 8.0),
-            decoration: BoxDecoration(
-              color: Colors.grey[200],
-              borderRadius: BorderRadius.circular(8.0),
-            ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
             child: Row(
-              children: [
+              children: <Widget>[
                 Expanded(
                   child: TextField(
-                    controller: messageController,
+                    controller: _messageController,
                     decoration: InputDecoration(
-                      hintText: 'Type your message...',
-                      border: InputBorder.none,
+                      hintText: 'Enter your message...',
                     ),
                   ),
                 ),
                 IconButton(
-                  onPressed: () {
-                    String message = messageController.text;
-                    if (message.isNotEmpty) {
-                      sendMessage(message);
-                      messageController.clear();
-                    }
-                  },
                   icon: Icon(Icons.send),
-                  color: Colors.blue,
+                  onPressed: () {
+                    _sendMessage(_messageController.text);
+                  },
                 ),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _sendMessage(String text) {
+    if (text.isNotEmpty) {
+      FirebaseFirestore.instance
+          .collection('chats')
+          .doc(widget.currentUserId)
+          .collection(widget.adminId)
+          .add({
+        'text': text,
+        'sender': widget.currentUserId,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      _messageController.clear();
+    }
+  }
+}
+
+class MessageWidget extends StatelessWidget {
+  final String text;
+  final bool isCurrentUser;
+
+  MessageWidget({required this.text, required this.isCurrentUser});
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: isCurrentUser ? Alignment.centerRight : Alignment.centerLeft,
+      child: Container(
+        margin: EdgeInsets.all(8),
+        padding: EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: isCurrentUser ? Color(0xff453658) : Colors.grey,
+          borderRadius: isCurrentUser
+              ? BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  bottomLeft: Radius.circular(20),
+                  bottomRight: Radius.circular(20),
+                )
+              : BorderRadius.only(
+                  topRight: Radius.circular(20),
+                  bottomLeft: Radius.circular(20),
+                  bottomRight: Radius.circular(20),
+                ),
+        ),
+        child: Text(
+          text,
+          style: TextStyle(color: Colors.white),
+        ),
       ),
     );
   }
