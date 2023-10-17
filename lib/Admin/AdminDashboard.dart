@@ -248,26 +248,26 @@ class _AdminDashboardState extends State<Admin_Dashboard> {
           ],
         ),
       ),
-      body: StreamBuilder<QuerySnapshot>(
+      body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream: FirebaseFirestore.instance
             .collection('complains')
             .where('status', isNotEqualTo: 2)
             .snapshots(),
         builder: (BuildContext context,
-            AsyncSnapshot<QuerySnapshot<Object?>> snapshot) {
+            AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
           if (snapshot.hasError) {
             return Text('Error: ${snapshot.error}');
           }
 
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const CircularProgressIndicator();
+            return CircularProgressIndicator();
           }
 
           List<QueryDocumentSnapshot> documents = snapshot.data!.docs;
           if (documents.isEmpty) {
             return Center(
               child: Text(
-                'No complains yet.',
+                'No complaints yet.',
                 style: TextStyle(fontSize: 16),
               ),
             );
@@ -282,7 +282,7 @@ class _AdminDashboardState extends State<Admin_Dashboard> {
                 var address = data?['address'];
                 var phoneno = data?["phoneno"];
                 var description = data?["complain"];
-                // var status = data?["status"];
+                var status = data?["status"];
                 return Container(
                   decoration: BoxDecoration(
                     border: Border.all(

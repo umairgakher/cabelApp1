@@ -4,6 +4,7 @@
 // import 'package:app/user/signup.dart';
 // import 'package:app/user/userdashboard.dart';
 import 'package:app/Admin/AdminDashboard.dart';
+import 'package:app/Emplyee/Dashboard.dart';
 // import 'package:app/Employee/Dashboard.dart';
 import 'package:app/User/Dashboard/Dashboard.dart';
 import 'package:app/signup.dart';
@@ -220,23 +221,28 @@ class _loginScreenState extends State<loginScreen> {
                         print('checkuser: $checkuser');
 
                         if (checkuser == 1) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => Admin_Dashboard()),
-                          );
+                          if (userCredential.user != null) {
+                            // Navigate to the AdminDashboard screen
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => Admin_Dashboard()),
+                            );
+                          } else {
+                            // Handle login failure (show an error message, etc.)
+                          }
                         } else if (checkuser == 0) {
-                          Navigator.push(
+                          Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
                                 builder: (context) => Dashboard()),
                           );
                         } else if (checkuser == 2) {
-                          // Navigator.push(
-                          //   context,
-                          //   MaterialPageRoute(
-                          //       builder: (context) => EmployeeDashboard()),
-                          // );
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => EmployeeDashboard()),
+                          );
                         }
                       } else {
                         print('User document does not exist');
