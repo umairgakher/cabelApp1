@@ -225,7 +225,7 @@ class _HomePageState extends State<Settings_user> {
             top: 55,
             left: 30,
             child: Text(
-              "$total",
+              "${userpayment().bill}",
               style: TextStyle(
                 color: textcolor,
                 fontSize: 34,
@@ -237,11 +237,14 @@ class _HomePageState extends State<Settings_user> {
             bottom: 50,
             left: 30,
             child: GestureDetector(
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => payment_method(),
-                ),
-              ),
+              onTap: () {
+                userpayment().check = 2;
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => payment_method(),
+                  ),
+                );
+              },
               child: Material(
                 color: color1,
                 elevation: 10,

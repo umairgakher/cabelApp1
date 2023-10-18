@@ -4,6 +4,7 @@ import 'package:app/Admin/Bills/Bills.dart';
 import 'package:app/Admin/emplyees.dart';
 import 'package:app/Admin/holidaysreques.dart';
 import 'package:app/Admin/polls/polls.dart';
+import 'package:app/screens/admin_chat_screen.dart';
 import 'package:app/signin.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -172,6 +173,24 @@ class _AdminDashboardState extends State<Admin_Dashboard> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => Polls_admin()),
+                  );
+                }),
+            Divider(color: Colors.grey),
+            ListTile(
+                leading: Icon(
+                  Icons.chat_bubble,
+                  color: Colors.black,
+                ),
+                title: Text(
+                  'Chats',
+                  style: TextStyle(
+                    color: Colors.black,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => AdminChatScreen()),
                   );
                 }),
             Divider(color: Colors.grey),

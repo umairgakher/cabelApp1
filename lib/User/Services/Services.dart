@@ -1,6 +1,9 @@
-// ignore_for_file: prefer_const_constructors, camel_case_types, library_private_types_in_public_api, file_names, deprecated_member_use
+// ignore_for_file: prefer_const_constructors, camel_case_types, library_private_types_in_public_api, file_names, deprecated_member_use, avoid_print
 
 import 'package:app/User/Services/payment.dart';
+import 'package:app/User/Services/paymnet_controller.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class Change_services extends StatefulWidget {
@@ -11,13 +14,46 @@ class Change_services extends StatefulWidget {
 }
 
 class _ChangeServicesState extends State<Change_services> {
-  String selectedService = 'Basic'; // Default selected service
+  String? selectedService = userpayment().service; // Default selected service
   Map<String, Map<String, dynamic>> serviceDetails = {
     'Basic': {'price': 400, 'Quality': '720', 'channels': 100},
     'Gold': {'price': 700, 'Quality': '1080', 'channels': 120},
     'Premium': {'price': 1200, 'Quality': '1280', 'channels': 150},
     // Add more services and their details here
   };
+  User? user;
+  String? username;
+  String? email;
+  String? service;
+  double? bill;
+
+  @override
+  void initState() {
+    super.initState();
+    user = FirebaseAuth.instance.currentUser;
+
+    // Retrieve user data from Firestore and set it to `username` and `email`
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(user?.uid)
+        .get()
+        .then((snapshot) {
+      if (snapshot.exists) {
+        var data = snapshot.data() as Map<String, dynamic>;
+        setState(() {
+          email = data['email'];
+          username = data['username'];
+          service = data["service"];
+          bill = data["bill"];
+        });
+      }
+    }).catchError((error) {
+      print("Error fetching user data: $error");
+    });
+
+    // Fetch employee data from Firestore's "salary" collection
+    // _fetchEmployeeData();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,6 +86,10 @@ class _ChangeServicesState extends State<Change_services> {
                   onChanged: (newValue) {
                     setState(() {
                       selectedService = newValue!;
+                      userpayment().service = selectedService;
+
+                      userpayment().price =
+                          serviceDetails[selectedService]!['price'];
                     });
                   },
                   items: serviceDetails.keys.map((service) {
@@ -65,7 +105,7 @@ class _ChangeServicesState extends State<Change_services> {
               ),
             ),
             SizedBox(height: 20),
-            if (selectedService.isNotEmpty)
+            if (selectedService!.isNotEmpty)
               Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -86,11 +126,27 @@ class _ChangeServicesState extends State<Change_services> {
               ),
             SizedBox(height: 20),
             ElevatedButton(
+              onPressed: () {},
+              style: ElevatedButton.styleFrom(
+                primary: Color(0xff392850),
+                padding: EdgeInsets.symmetric(vertical: 16),
+              ),
+              child: Text(
+                'current service is: $service',
+                style: TextStyle(fontSize: 18, color: Colors.white),
+              ),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
               onPressed: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => payment_method()),
                 );
+                userpayment().service = selectedService;
+
+                userpayment().uid = user!.uid;
+                userpayment().price = serviceDetails[selectedService]!['price'];
               },
               style: ElevatedButton.styleFrom(
                 primary: Color(0xff392850),

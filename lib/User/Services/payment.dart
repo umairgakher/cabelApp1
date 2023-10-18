@@ -1,7 +1,10 @@
-// ignore_for_file: camel_case_types, library_private_types_in_public_api, deprecated_member_use, use_build_context_synchronously, prefer_const_constructors, use_key_in_widget_constructors, avoid_unnecessary_containers
+// ignore_for_file: camel_case_types, library_private_types_in_public_api, deprecated_member_use, use_build_context_synchronously, prefer_const_constructors, use_key_in_widget_constructors, avoid_unnecessary_containers, curly_braces_in_flow_control_structures
 
 import 'package:app/User/Dashboard/Dashboard.dart';
+import 'package:app/User/Services/paymnet_controller.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class payment_method extends StatefulWidget {
@@ -13,9 +16,23 @@ class payment_method extends StatefulWidget {
 
 class _PaymentMethodScreenState extends State<payment_method> {
   bool _isLoading = false;
+  int? input;
   TextEditingController paymentController = TextEditingController();
 
   Future<void> _sendPayment() async {
+    if (userpayment().check == 2 && userpayment().bill == input) {
+      FirebaseFirestore.instance
+          .collection("users")
+          .doc(userpayment().uid)
+          .update({"paid": 1});
+      setState(() {});
+    } else if (userpayment().price == input) {
+      FirebaseFirestore.instance
+          .collection("users")
+          .doc(userpayment().uid)
+          .update({"service": userpayment().service});
+      setState(() {});
+    }
     setState(() {
       _isLoading = true;
     });
@@ -63,7 +80,41 @@ class _PaymentMethodScreenState extends State<payment_method> {
             BankAccountDisplay(),
             SizedBox(height: 16),
             ElevatedButton(
-              onPressed: _isLoading ? null : _sendPayment,
+              onPressed: () {
+                String inputText =
+                    paymentController.text; // Get the input as a string
+                input = int.tryParse(inputText); // Try to parse it to an int
+
+                if (input != null) {
+                  if (userpayment().price == input ||
+                      (userpayment().check == 2 &&
+                          userpayment().bill == input)) {
+                    if (!_isLoading) {
+                      _sendPayment();
+                    }
+                  } else {
+                    Fluttertoast.showToast(
+                      msg: "Enter Correct price",
+                      toastLength: Toast.LENGTH_SHORT,
+                      gravity: ToastGravity.BOTTOM,
+                      timeInSecForIosWeb: 1,
+                      backgroundColor: Color(0xff392850),
+                      textColor: Colors.white,
+                      fontSize: 16.0,
+                    );
+                  }
+                } else {
+                  Fluttertoast.showToast(
+                    msg: "Invalid input. Please enter a valid number.",
+                    toastLength: Toast.LENGTH_SHORT,
+                    gravity: ToastGravity.BOTTOM,
+                    timeInSecForIosWeb: 1,
+                    backgroundColor: Color(0xff392850),
+                    textColor: Colors.white,
+                    fontSize: 16.0,
+                  );
+                }
+              },
               child: _isLoading ? CircularProgressIndicator() : Text('Send'),
             ),
           ],

@@ -4,6 +4,7 @@ import 'package:app/Admin/Bills/Bills.dart';
 import 'package:app/Admin/Help/admin_help.dart';
 import 'package:app/Emplyee/holiday.dart';
 import 'package:app/Emplyee/myholidays.dart';
+import 'package:app/profile.dart';
 import 'package:app/signin.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -150,7 +151,8 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const bills_user()),
+                  MaterialPageRoute(
+                      builder: (context) => const ProfileScreen()),
                 );
                 // Handle Settings option tap
               },

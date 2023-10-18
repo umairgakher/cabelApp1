@@ -2,6 +2,7 @@
 
 import 'package:app/User/Complaint/complaintus.dart';
 import 'package:app/User/SelfService/Selfservice.dart';
+import 'package:app/User/Services/paymnet_controller.dart';
 import 'package:app/User/Setting/Setting.dart';
 import 'package:app/User/Talkus/Talkus.dart';
 import 'package:app/User/TrackOrder/TrackC.dart';
@@ -9,6 +10,7 @@ import 'package:app/signin.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../profile.dart';
@@ -46,6 +48,9 @@ class _DashboardState extends State<Dashboard> {
   User? user;
   String? username;
   String? email;
+  String? service;
+  double? bill;
+  int? paid;
 
   @override
   void initState() {
@@ -63,6 +68,13 @@ class _DashboardState extends State<Dashboard> {
         setState(() {
           email = data['email'];
           username = data['username'];
+          service = data["service"];
+          bill = data["bill"];
+          paid = data["paid"];
+
+          userpayment().bill = bill;
+          userpayment().service = service;
+          userpayment().uid = user!.uid;
         });
       }
     }).catchError((error) {
@@ -246,11 +258,7 @@ class _DashboardState extends State<Dashboard> {
     } else if (title == "Talk to Us") {
       Navigator.push(
         context,
-        MaterialPageRoute(
-            builder: (context) => ChatScreen(
-                  currentUserId: user!.uid,
-                  adminId: 'muVRzBO10cUDTrASEpkUW25xosk2',
-                )),
+        MaterialPageRoute(builder: (context) => const Talk_service()),
       );
     } else if (title == "Change Service") {
       Navigator.push(
@@ -258,10 +266,22 @@ class _DashboardState extends State<Dashboard> {
         MaterialPageRoute(builder: (context) => const Change_services()),
       );
     } else if (title == "Bills") {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => Settings_user()),
-      );
+      if (paid == 0) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => Settings_user()),
+        );
+      } else {
+        Fluttertoast.showToast(
+          msg: "No bill yet now for you ",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Color(0xff392850),
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
+      }
     }
   }
 }

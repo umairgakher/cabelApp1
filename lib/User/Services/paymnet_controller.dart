@@ -3,6 +3,10 @@
 class userpayment {
   static final userpayment _session = userpayment._internal();
   double? bill;
+  String? service;
+  String? uid;
+  int? price;
+  int check = 1;
   factory userpayment() {
     return _session;
   }

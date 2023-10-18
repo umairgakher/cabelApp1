@@ -126,10 +126,11 @@ class _RegScreenState extends State<RegScreen> {
                 "createdId": DateTime.now(),
                 "uPhone": uphone,
                 "profileImage": " ",
-                'active': 0,
+                'salary': 0,
                 "userId": user.uid,
                 "checkuser": 0,
-                "ondelivery": 0,
+                "paid": 0,
+                "service": "Basic",
               });
         ;
 
