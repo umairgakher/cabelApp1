@@ -6,6 +6,7 @@ import 'package:app/User/Services/paymnet_controller.dart';
 import 'package:app/User/Setting/Setting.dart';
 import 'package:app/User/Talkus/Talkus.dart';
 import 'package:app/User/TrackOrder/TrackC.dart';
+import 'package:app/User/poll/poll.dart';
 import 'package:app/signin.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -44,6 +45,10 @@ class _DashboardState extends State<Dashboard> {
   Items item6 = new Items(
     title: "Bills",
     img: "images/setting.jpg",
+  );
+  Items item7 = new Items(
+    title: "Poll",
+    img: "images/poll.png",
   );
   User? user;
   String? username;
@@ -97,7 +102,8 @@ class _DashboardState extends State<Dashboard> {
       item3,
       item4,
       item5,
-      item6
+      item6,
+      item7
     ]; // Add all items here
     var color = 0xff453658;
     return Scaffold(
@@ -232,7 +238,7 @@ class _DashboardState extends State<Dashboard> {
           ),
           Padding(
             padding: const EdgeInsets.only(bottom: 25),
-            child: PollWidget(),
+            // child: PollWidget(),
           ),
         ],
       ),
@@ -282,6 +288,11 @@ class _DashboardState extends State<Dashboard> {
           fontSize: 16.0,
         );
       }
+    } else if (title == "Poll") {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => Userpolls()),
+      );
     }
   }
 }
@@ -290,127 +301,4 @@ class Items {
   String title;
   String img;
   Items({required this.title, required this.img});
-}
-
-class PollWidget extends StatefulWidget {
-  @override
-  _PollWidgetState createState() => _PollWidgetState();
-}
-
-class _PollWidgetState extends State<PollWidget> {
-  int selectedOption = 0; // Initialize selectedOption variable
-  bool isButtonDisabled =
-      false; // Add a boolean variable to track button disable state
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(top: 20),
-      child: Container(
-        height: 200,
-        width: MediaQuery.of(context).size.width *
-            0.9, // Adjusted width to make it responsive
-        decoration: BoxDecoration(
-          color: const Color(0xff453658),
-          borderRadius: BorderRadius.circular(15),
-        ),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'Which One is Better?',
-                style: GoogleFonts.openSans(
-                  textStyle: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 14, // Reduced text size
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 6),
-              buildRadioButton(
-                1,
-                'The Newer Connection with the 400 channels?',
-              ),
-              buildRadioButton(
-                  2, 'The older Connection with the 200 channels?'),
-              buildRadioButton(3, 'The Connection with the 100 HD channels?'),
-              const SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: isButtonDisabled
-                    ? null
-                    : () {
-                        setState(() {
-                          selectedOption =
-                              selectedOption; // Optional: Update the selectedOption again
-                          isButtonDisabled = true; // Disable the button
-                        });
-                      },
-                style: ElevatedButton.styleFrom(
-                  primary: Colors.blue,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  elevation:
-                      2, // Adjust the elevation value for a subtle shadow effect
-                  minimumSize: Size(150, 40),
-                ),
-                child: Text(
-                  isButtonDisabled ? 'Voted' : 'Vote',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget buildRadioButton(int value, String label) {
-    return InkWell(
-      onTap: () {
-        setState(() {
-          selectedOption = value;
-        });
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-        child: Row(
-          children: [
-            Container(
-              height: 18, // Reduced icon size
-              width: 18, // Reduced icon size
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.grey),
-                color:
-                    selectedOption == value ? Colors.blue : Colors.transparent,
-              ),
-              child: selectedOption == value
-                  ? const Icon(
-                      Icons.check,
-                      color: Colors.white,
-                      size: 14, // Reduced icon size
-                    )
-                  : null,
-            ),
-            const SizedBox(width: 8), // Reduced spacing
-            Expanded(
-              child: Text(
-                label,
-                style: GoogleFonts.openSans(
-                  textStyle: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 14, // Reduced text size
-                    fontWeight: FontWeight.w300,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }

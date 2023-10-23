@@ -1,21 +1,21 @@
-// ignore_for_file: use_key_in_widget_constructors, camel_case_types, library_private_types_in_public_api, prefer_final_fields, avoid_print, prefer_const_constructors, deprecated_member_use
-import 'package:firebase_database/firebase_database.dart';
+// ignore_for_file: use_key_in_widget_constructors, camel_case_types, prefer_final_fields, library_private_types_in_public_api, avoid_print, prefer_const_constructors
+
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Polls_admin extends StatefulWidget {
   @override
-  _PollsAdminState createState() => _PollsAdminState();
+  _Polls_adminState createState() => _Polls_adminState();
 }
 
-class _PollsAdminState extends State<Polls_admin> {
+class _Polls_adminState extends State<Polls_admin> {
   TextEditingController _questionController = TextEditingController();
   List<TextEditingController> _answerControllers = [
     TextEditingController(),
     TextEditingController(),
   ];
 
-// Create a reference to your Firebase database
-  final DatabaseReference _database = FirebaseDatabase.instance.reference();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   void _createPoll() {
     try {
@@ -25,23 +25,13 @@ class _PollsAdminState extends State<Polls_admin> {
 
       if (question.isEmpty) {
         _showError('Please enter the question.');
+      } else if (answers.length < 2 || answers.length > 4) {
+        _showError('Please provide between 2 and 4 answers.');
       } else if (answers.any((answer) => answer.isEmpty)) {
         _showError('Please enter all answers.');
       } else {
         // All fields are filled, proceed to post the poll
-        // Save the question
-        _database.child('polls').push().set({
-          'question': question,
-        });
-
-        // Save the answers as "answer1", "answer2", ...
-        for (int i = 0; i < answers.length; i++) {
-          _database
-              .child('polls')
-              .child('answers')
-              .child('answer${i + 1}')
-              .set(answers[i]);
-        }
+        createPoll(question, answers);
 
         print('Question: $question');
         print('Answers: $answers');
@@ -49,6 +39,22 @@ class _PollsAdminState extends State<Polls_admin> {
     } catch (error, stackTrace) {
       print('Error: $error');
       print('Stack trace: $stackTrace');
+    }
+  }
+
+  Future<void> createPoll(String question, List<String> answers) async {
+    // Add a new poll document to the 'polls' collection
+    DocumentReference pollRef = await _firestore.collection('polls').add({
+      'question': question,
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+
+    // Add answers to the 'answers' subcollection
+    for (String answer in answers) {
+      await pollRef.collection('answers').add({
+        'text': answer,
+        'count': 0, // Initialize count to 0
+      });
     }
   }
 
@@ -73,15 +79,38 @@ class _PollsAdminState extends State<Polls_admin> {
   }
 
   void _addAnswer() {
-    setState(() {
-      _answerControllers.add(TextEditingController());
-    });
+    if (_answerControllers.length >= 4) {
+      // Maximum answer limit reached, show a dialog
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text('Maximum Answers Reached'),
+            content: Text('You can add a maximum of four answers.'),
+            actions: [
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    } else {
+      setState(() {
+        _answerControllers.add(TextEditingController());
+      });
+    }
   }
 
   void _removeAnswer(int index) {
-    setState(() {
-      _answerControllers.removeAt(index);
-    });
+    if (_answerControllers.length > 2) {
+      setState(() {
+        _answerControllers.removeAt(index);
+      });
+    }
   }
 
   @override
